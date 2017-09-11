@@ -1,11 +1,9 @@
 package com.example.batrakov.servicetask;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         intent = new Intent(this, MyService.class);
         startService(intent);
-
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
 
     }
 
