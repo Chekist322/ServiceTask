@@ -16,11 +16,14 @@ import android.widget.EditText;
 
 
 public class MainActivity extends AppCompatActivity {
+    boolean mBound = false;
+
     MyService mService;
     EditText text;
     Button button;
     String str;
     Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,13 +56,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
- //       unbindService(mConnection);
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        unbindService(mConnection);
+  //      unbindService(mConnection);
         super.onDestroy();
     }
 
@@ -79,12 +86,14 @@ public class MainActivity extends AppCompatActivity {
             text.setText(str);
             Log.i("Service1", "connected");
             Log.i("Service1", str +"_");
+            mBound = true;
 
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.i("Service1", "disconnected");
+            mBound = false;
         }
     };
 
