@@ -1,9 +1,11 @@
 package com.example.batrakov.servicetask;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 
@@ -19,6 +21,12 @@ public class MyService extends Service {
 
     @Override
     public void onCreate() {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher);
+        Notification notification;
+        notification = builder.build();
+        startForeground(777, notification);
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
