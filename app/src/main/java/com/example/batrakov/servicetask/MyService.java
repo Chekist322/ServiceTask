@@ -17,7 +17,7 @@ import android.widget.Toast;
 public class MyService extends Service {
 
     static final int MSG_CONNECT = 1;
-    static final int MSG_SAVE_STR = 2;
+    static final int MSG_UPDATE_STR = 2;
     private static String str;
     private static Messenger activityMessenger = null;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -30,7 +30,7 @@ public class MyService extends Service {
                     activityMessenger = msg.replyTo;
                     changeString();
                     break;
-                case MSG_SAVE_STR:
+                case MSG_UPDATE_STR:
                     str = msg.getData().getString("str");
                     break;
                 default:
@@ -55,11 +55,6 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return Service.START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override

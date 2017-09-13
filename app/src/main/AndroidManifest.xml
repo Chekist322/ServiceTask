@@ -19,6 +19,7 @@
         </activity>
 
         <service
+            android:permission="@string/test"
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"

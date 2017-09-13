@@ -16,12 +16,12 @@ import android.widget.EditText;
 public class MainActivity extends AppCompatActivity {
     static final int MSG_CHANGE_STR = 1;
     private final Messenger mMessenger = new Messenger(new IncomingHandler());
-    private boolean mBound = false;
     private Messenger serviceMessenger = null;
+    private boolean mBound = false;
     private EditText textField;
     private Intent intent;
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection serviceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -50,13 +50,12 @@ public class MainActivity extends AppCompatActivity {
         textField = (EditText) findViewById(R.id.editText);
         intent = new Intent(this, MyService.class);
         startService(intent);
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStart() {
         if (!mBound) {
-            bindService(intent, mConnection, BIND_AUTO_CREATE);
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE);
         }
         super.onStart();
     }
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         sendString();
         if (mBound) {
-            unbindService(mConnection);
+            unbindService(serviceConnection);
         }
         super.onStop();
     }
@@ -78,12 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
         super.onResume();
     }
 
     private void sendString() {
-        Message msg = Message.obtain(null, MyService.MSG_SAVE_STR);
+        Message msg = Message.obtain(null, MyService.MSG_UPDATE_STR);
         try {
             Bundle b = new Bundle();
             b.putString("str", textField.getText().toString());
