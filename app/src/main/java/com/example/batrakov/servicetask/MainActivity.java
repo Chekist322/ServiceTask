@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -40,39 +41,31 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sayHello();
+                sendString();
                 str = text.getText().toString();
             }
         });
 
 
         intent = new Intent(this, MyService.class);
-//        startService(intent);
-//        bindService(intent, mConnection, BIND_AUTO_CREATE);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
+
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+
 
     }
 
-
-    public void sayHello() {
-        if (!mBound) return;
-        // Create and send a message to the service, using a supported 'what' value
-        Message msg = Message.obtain(null, MyService.MSG_SAY_HELLO, 0, 0);
-        try {
-            mService.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
 
 
 
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
+
             switch (msg.what) {
                 case MSG_CHANGE_STR:
-                    text.setText("Test");
+                    Toast.makeText(getApplicationContext(), "ActivityHandler", Toast.LENGTH_SHORT).show();
+                    text.setText(msg.getData().getString("str"));
                     break;
                 default:
                     super.handleMessage(msg);
@@ -114,13 +107,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            // This is called when the connection with the service has been
-            // established, giving us the object we can use to
-            // interact with the service.  We are communicating with the
-            // service using a Messenger, so here we get a client-side
-            // representation of that from the raw IBinder object.
+
             mService = new Messenger(service);
             mBound = true;
+            Message msg = Message.obtain(null, MyService.MSG_SAY_HELLO);
+            msg.replyTo = mMessenger;
+            try {
+                mService.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             Log.i("Service1", "connected");
             Log.i("Service1", str +"_");
 
@@ -128,12 +124,24 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
+
             mService = null;
             mBound = false;
         }
     };
+
+
+    private void sendString(){
+        Message msg = Message.obtain(null, MyService.MSG_SAVE_STR);
+        Bundle b = new Bundle();
+        b.putString("str", text.getText().toString());
+        msg.setData(b);
+        try {
+            mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

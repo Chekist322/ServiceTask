@@ -1,12 +1,15 @@
 package com.example.batrakov.servicetask;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,8 +17,13 @@ import android.widget.Toast;
 public class MyService extends Service {
 
 
-    /** Command to the service to display a message */
+
     static final int MSG_SAY_HELLO = 1;
+    static final int MSG_SAVE_STR = 2;
+    private String str;
+    int i = 0;
+    Messenger mActivity = null;
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     /**
      * Handler of incoming messages from clients.
@@ -25,7 +33,11 @@ public class MyService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SAY_HELLO:
-                    Toast.makeText(getApplicationContext(), "hello!", Toast.LENGTH_SHORT).show();
+                    mActivity = msg.replyTo;
+                    changeStr();
+                    break;
+                case MSG_SAVE_STR:
+                    str = msg.getData().getString("str");
                     break;
                 default:
                     super.handleMessage(msg);
@@ -33,10 +45,6 @@ public class MyService extends Service {
         }
     }
 
-    /**
-     * Target we publish for clients to send messages to IncomingHandler.
-     */
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     /**
      * When binding to the service, we return an interface to our messenger
@@ -48,15 +56,32 @@ public class MyService extends Service {
         return mMessenger.getBinder();
     }
 
-    String str;
-    int i = 0;
+
 
     public MyService(){
         str = "sample";
     }
 
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return Service.START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i("Destroy", "destroyed");
+        super.onDestroy();
+    }
+
     @Override
     public void onCreate() {
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher);
+        Notification notification;
+        notification = builder.build();
+        startForeground(777, notification);
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -78,11 +103,19 @@ public class MyService extends Service {
     }
 
 
-    public class LocalBinder extends Binder {
-        MyService getService() {
-            return MyService.this;
+    public void changeStr(){
+        Message msg = Message.obtain(null, MainActivity.MSG_CHANGE_STR);
+        try {
+            Log.i("str", str);
+            Bundle b = new Bundle();
+            b.putString("str", str);
+            msg.setData(b);
+            mActivity.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
+
 
     /** methods for clients */
     public String getString(){
@@ -92,4 +125,4 @@ public class MyService extends Service {
     public void setString(String newStr){
         str = newStr;
     }
-}
+    }
