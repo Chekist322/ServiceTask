@@ -16,25 +16,19 @@ import android.widget.Toast;
 
 public class MyService extends Service {
 
-
-
-    static final int MSG_SAY_HELLO = 1;
+    static final int MSG_CONNECT = 1;
     static final int MSG_SAVE_STR = 2;
-    private String str;
-    int i = 0;
-    Messenger mActivity = null;
+    private static String str;
+    private static Messenger activityMessenger = null;
     final Messenger mMessenger = new Messenger(new IncomingHandler());
 
-    /**
-     * Handler of incoming messages from clients.
-     */
-    class IncomingHandler extends Handler {
+    private static class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SAY_HELLO:
-                    mActivity = msg.replyTo;
-                    changeStr();
+                case MSG_CONNECT:
+                    activityMessenger = msg.replyTo;
+                    changeString();
                     break;
                 case MSG_SAVE_STR:
                     str = msg.getData().getString("str");
@@ -45,23 +39,18 @@ public class MyService extends Service {
         }
     }
 
-
-    /**
-     * When binding to the service, we return an interface to our messenger
-     * for sending messages to the service.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
-        return mMessenger.getBinder();
-    }
-
-
-
-    public MyService(){
+    public MyService() {
         str = "sample";
     }
 
+    @Override
+    public void onCreate() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher);
+        Notification notification;
+        notification = builder.build();
+        startForeground(777, notification);
+        super.onCreate();
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -70,59 +59,25 @@ public class MyService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i("Destroy", "destroyed");
         super.onDestroy();
     }
 
     @Override
-    public void onCreate() {
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setSmallIcon(R.mipmap.ic_launcher);
-        Notification notification;
-        notification = builder.build();
-        startForeground(777, notification);
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    Log.i("Service2", String.valueOf(i++));
-                    try {
-                        synchronized (this) {
-                            this.wait(1000);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        thread.start();
-        super.onCreate();
+    public IBinder onBind(Intent intent) {
+        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
+        return mMessenger.getBinder();
     }
 
-
-    public void changeStr(){
+    private static void changeString() {
         Message msg = Message.obtain(null, MainActivity.MSG_CHANGE_STR);
         try {
             Log.i("str", str);
             Bundle b = new Bundle();
             b.putString("str", str);
             msg.setData(b);
-            mActivity.send(msg);
+            activityMessenger.send(msg);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
-
-
-    /** methods for clients */
-    public String getString(){
-        return str;
-    }
-
-    public void setString(String newStr){
-        str = newStr;
-    }
-    }
+}

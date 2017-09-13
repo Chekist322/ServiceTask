@@ -22,9 +22,7 @@
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
-            android:directBootAware="true"
-            android:process="com.example.batrakov.servicetaskk"
-            />
+            android:process="com.example.batrakov.servicetaskk" />
 
     </application>
 
