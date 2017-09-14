@@ -67,7 +67,9 @@ public class MyService extends Service {
                     changeString();
                     break;
                 case MSG_UPDATE_STR:
-                    str = msg.getData().getString("str");
+                    if (msg.getData().getString("str") != null) {
+                        str = msg.getData().getString("str");
+                    }
                     break;
                 default:
                     super.handleMessage(msg);

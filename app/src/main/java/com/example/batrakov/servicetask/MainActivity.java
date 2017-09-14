@@ -95,7 +95,9 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_CHANGE_STR:
-                    textField.setText(msg.getData().getString("str"));
+                    if (msg.getData().getString("str") != null) {
+                        textField.setText(msg.getData().getString("str"));
+                    }
                     break;
                 default:
                     super.handleMessage(msg);
