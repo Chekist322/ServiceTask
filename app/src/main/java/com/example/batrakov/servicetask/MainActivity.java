@@ -65,19 +65,16 @@ public class MainActivity extends AppCompatActivity {
         sendString();
         if (mBound) {
             unbindService(serviceConnection);
+            mBound = false;
         }
         super.onStop();
     }
 
     @Override
-    protected void onDestroy() {
-        sendString();
-        super.onDestroy();
-    }
-
-    @Override
     protected void onResume() {
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        if (!mBound) {
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        }
         super.onResume();
     }
 

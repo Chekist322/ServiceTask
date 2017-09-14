@@ -19,11 +19,11 @@
         </activity>
 
         <service
-            android:permission="@string/test"
             android:name=".MyService"
             android:enabled="true"
             android:exported="true"
-            android:process="com.example.batrakov.servicetaskk" />
+            android:permission="@string/test"
+            android:process="com.example.batrakov.servicetask2" />
 
     </application>
 
